@@ -63,7 +63,7 @@ func Test_publishingMessageCarrier_Set(t *testing.T) {
 	carrier.Set("foo1", "bar2")
 	carrier.Set("foo2", "bar3")
 
-	assert.Equal(t, carrier.msg.Headers, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+	assert.Equal(t, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"}, carrier.msg.Headers)
 }
 
 func Test_publishingMessageCarrier_Keys(t *testing.T) {
@@ -158,7 +158,7 @@ func Test_deliveryMessageCarrier_Set(t *testing.T) {
 	carrier.Set("foo1", "bar2")
 	carrier.Set("foo2", "bar3")
 
-	assert.Equal(t, carrier.msg.Headers, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+	assert.Equal(t, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"}, carrier.msg.Headers)
 }
 
 func Test_deliveryMessageCarrier_Keys(t *testing.T) {

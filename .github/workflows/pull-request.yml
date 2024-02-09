@@ -1,4 +1,4 @@
-name: CI
+name: ci
 on:
   push:
     branches:
@@ -21,3 +21,31 @@ jobs:
         uses: golangci/golangci-lint-action@v3.7.1
         with:
           version: latest
+  test-coverage:
+    name: test-coverage
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ 'oldstable', 'stable' ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Test
+        run: go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+  test-race:
+    name: test-race
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ 'oldstable', 'stable' ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Run tests with race detector
+        run: go test -race ./...
