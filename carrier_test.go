@@ -1,0 +1,190 @@
+package amqp091otel
+
+import (
+	"testing"
+
+	"github.com/rabbitmq/amqp091-go"
+	"github.com/stretchr/testify/assert"
+)
+
+func Test_publishingMessageCarrier_Get(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		msg *amqp091.Publishing
+	}
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   string
+	}{
+		{
+			name:   "exists",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar"}}},
+			args:   args{key: "foo"},
+			want:   "bar",
+		}, {
+			name:   "not exists",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo1": "bar"}}},
+			args:   args{key: "foo"},
+			want:   "",
+		}, {
+			name:   "ignore not string",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": 1}}},
+			args:   args{key: "foo"},
+			want:   "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := publishingMessageCarrier{
+				msg: tt.fields.msg,
+			}
+			if got := c.Get(tt.args.key); got != tt.want {
+				t.Errorf("Get() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_publishingMessageCarrier_Set(t *testing.T) {
+	t.Parallel()
+	msg := &amqp091.Publishing{Headers: nil}
+	carrier := newPublishingMessageCarrier(msg)
+
+	carrier.Set("foo", "bar")
+	carrier.Set("foo1", "bar1")
+	carrier.Set("foo1", "bar2")
+	carrier.Set("foo2", "bar3")
+
+	assert.ElementsMatch(t, carrier.msg.Headers, map[string]any{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+}
+
+func Test_publishingMessageCarrier_Keys(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		msg *amqp091.Publishing
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name:   "empty",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{}}},
+			want:   []string{},
+		}, {
+			name:   "one",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar"}}},
+			want:   []string{"foo"},
+		}, {
+			name:   "many",
+			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar", "foo1": "bar1"}}},
+			want:   []string{"foo", "foo1"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := publishingMessageCarrier{
+				msg: tt.fields.msg,
+			}
+			got := c.Keys()
+			assert.ElementsMatch(t, tt.want, got)
+		})
+	}
+}
+
+func Test_deliveryMessageCarrier_Get(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		msg *amqp091.Delivery
+	}
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   string
+	}{
+		{
+			name:   "exists",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar"}}},
+			args:   args{key: "foo"},
+			want:   "bar",
+		}, {
+			name:   "not exists",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo1": "bar"}}},
+			args:   args{key: "foo"},
+			want:   "",
+		}, {
+			name:   "ignore not string",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": 1}}},
+			args:   args{key: "foo"},
+			want:   "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := deliveryMessageCarrier{
+				msg: tt.fields.msg,
+			}
+			if got := c.Get(tt.args.key); got != tt.want {
+				t.Errorf("Get() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_deliveryMessageCarrier_Set(t *testing.T) {
+	t.Parallel()
+	msg := &amqp091.Delivery{Headers: nil}
+	carrier := newDeliveryMessageCarrier(msg)
+
+	carrier.Set("foo", "bar")
+	carrier.Set("foo1", "bar1")
+	carrier.Set("foo1", "bar2")
+	carrier.Set("foo2", "bar3")
+
+	assert.ElementsMatch(t, carrier.msg.Headers, map[string]any{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+}
+
+func Test_deliveryMessageCarrier_Keys(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		msg *amqp091.Delivery
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []string
+	}{
+		{
+			name:   "empty",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{}}},
+			want:   []string{},
+		}, {
+			name:   "one",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar"}}},
+			want:   []string{"foo"},
+		}, {
+			name:   "many",
+			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar", "foo1": "bar1"}}},
+			want:   []string{"foo", "foo1"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := deliveryMessageCarrier{
+				msg: tt.fields.msg,
+			}
+			got := c.Keys()
+			assert.ElementsMatch(t, tt.want, got)
+		})
+	}
+}
