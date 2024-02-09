@@ -1,12 +1,15 @@
 package amqp091otel
 
 import (
-	"github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel/propagation"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
-var _ propagation.TextMapCarrier = (*publishingMessageCarrier)(nil)
-var _ propagation.TextMapCarrier = (*deliveryMessageCarrier)(nil)
+var (
+	_ propagation.TextMapCarrier = (*publishingMessageCarrier)(nil)
+	_ propagation.TextMapCarrier = (*deliveryMessageCarrier)(nil)
+)
 
 // publishingMessageCarrier injects and extracts traces from a amqp091.Publishing.
 type publishingMessageCarrier struct {

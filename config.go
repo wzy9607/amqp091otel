@@ -6,8 +6,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-const libName = "github.com/wzy9607/amqp091otel"
-const amqpLibName = "github.com/rabbitmq/amqp091-go"
+const (
+	libName     = "github.com/wzy9607/amqp091otel"
+	amqpLibName = "github.com/rabbitmq/amqp091-go"
+)
 
 type config struct {
 	TracerProvider trace.TracerProvider
@@ -18,8 +20,9 @@ type config struct {
 
 func newConfig(opts []Option) *config {
 	cfg := &config{
-		Propagators:    otel.GetTextMapPropagator(),
 		TracerProvider: otel.GetTracerProvider(),
+		Propagators:    otel.GetTextMapPropagator(),
+		Tracer:         nil,
 	}
 	for _, opt := range opts {
 		opt(cfg)

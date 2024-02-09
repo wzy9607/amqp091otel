@@ -3,8 +3,9 @@ package amqp091otel
 import (
 	"testing"
 
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func Test_publishingMessageCarrier_Get(t *testing.T) {
@@ -39,7 +40,9 @@ func Test_publishingMessageCarrier_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			c := publishingMessageCarrier{
 				msg: tt.fields.msg,
 			}
@@ -88,7 +91,9 @@ func Test_publishingMessageCarrier_Keys(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			c := publishingMessageCarrier{
 				msg: tt.fields.msg,
 			}
@@ -130,7 +135,9 @@ func Test_deliveryMessageCarrier_Get(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			c := deliveryMessageCarrier{
 				msg: tt.fields.msg,
 			}
@@ -179,7 +186,9 @@ func Test_deliveryMessageCarrier_Keys(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			c := deliveryMessageCarrier{
 				msg: tt.fields.msg,
 			}

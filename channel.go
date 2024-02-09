@@ -5,11 +5,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 const (
@@ -61,8 +62,8 @@ func (ch *Channel) commonAttrs() []attribute.KeyValue {
 	}
 }
 
-func (*Channel) nameWhenPublish(exchange, key string) string {
-	if len(exchange) == 0 {
+func (*Channel) nameWhenPublish(exchange string) string {
+	if exchange == "" {
 		exchange = "(default)"
 	}
 	return exchange + " publish"
@@ -102,7 +103,8 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 		trace.WithSpanKind(trace.SpanKindConsumer),
 	}
 
-	ctx, span := ch.cfg.Tracer.Start(parentCtx, ch.nameWhenConsume(queue), opts...)
+	ctx, span := ch.cfg.Tracer.Start(parentCtx, //nolint:spancheck // span ends when msg is ack/nack/rejected
+		ch.nameWhenConsume(queue), opts...)
 	msg.Acknowledger = &acknowledger{
 		ch:   ch,
 		ctx:  ctx,
@@ -112,7 +114,7 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 	ch.m.Lock()
 	defer ch.m.Unlock()
 	ch.spanMap[msg.DeliveryTag] = span
-}
+} //nolint:spancheck // span ends when msg is ack/nack/rejected
 
 func (ch *Channel) Consume(
 	queue, consumer string, autoAck, exclusive, noLocal, noWait bool, args amqp091.Table,
@@ -161,14 +163,13 @@ func (ch *Channel) PublishWithDeferredConfirmWithContext(
 		trace.WithAttributes(attrs...),
 		trace.WithSpanKind(trace.SpanKindProducer),
 	}
-	ctx, span := ch.cfg.Tracer.Start(ctx, ch.nameWhenPublish(exchange, key), opts...)
+	ctx, span := ch.cfg.Tracer.Start(ctx, ch.nameWhenPublish(exchange), opts...)
 
 	// Inject current span context
 	carrier := newPublishingMessageCarrier(&msg)
 	ch.cfg.Propagators.Inject(ctx, carrier)
 
 	dc, err := ch.Channel.PublishWithDeferredConfirmWithContext(ctx, exchange, key, mandatory, immediate, msg)
-
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())

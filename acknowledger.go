@@ -9,7 +9,7 @@ import (
 
 type acknowledger struct {
 	ch   *Channel
-	ctx  context.Context
+	ctx  context.Context //nolint:containedctx // consumer needs to retrieve the context via ContextFromDelivery.
 	span trace.Span
 }
 
@@ -23,7 +23,7 @@ func (a *acknowledger) Ack(tag uint64, multiple bool) error {
 	return err
 }
 
-func (a *acknowledger) Nack(tag uint64, multiple bool, requeue bool) error {
+func (a *acknowledger) Nack(tag uint64, multiple, requeue bool) error {
 	err := a.ch.Channel.Nack(tag, multiple, requeue)
 	if multiple {
 		a.endMultiple(tag, codes.Error, "nack", err)
