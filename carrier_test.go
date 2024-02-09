@@ -24,17 +24,17 @@ func Test_publishingMessageCarrier_Get(t *testing.T) {
 	}{
 		{
 			name:   "exists",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar"}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{"foo": "bar"}}},
 			args:   args{key: "foo"},
 			want:   "bar",
 		}, {
 			name:   "not exists",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo1": "bar"}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{"foo1": "bar"}}},
 			args:   args{key: "foo"},
 			want:   "",
 		}, {
 			name:   "ignore not string",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": 1}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{"foo": 1}}},
 			args:   args{key: "foo"},
 			want:   "",
 		},
@@ -55,7 +55,7 @@ func Test_publishingMessageCarrier_Get(t *testing.T) {
 
 func Test_publishingMessageCarrier_Set(t *testing.T) {
 	t.Parallel()
-	msg := &amqp091.Publishing{Headers: nil}
+	msg := &amqp091.Publishing{}
 	carrier := newPublishingMessageCarrier(msg)
 
 	carrier.Set("foo", "bar")
@@ -63,7 +63,7 @@ func Test_publishingMessageCarrier_Set(t *testing.T) {
 	carrier.Set("foo1", "bar2")
 	carrier.Set("foo2", "bar3")
 
-	assert.ElementsMatch(t, carrier.msg.Headers, map[string]any{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+	assert.Equal(t, carrier.msg.Headers, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
 }
 
 func Test_publishingMessageCarrier_Keys(t *testing.T) {
@@ -78,15 +78,15 @@ func Test_publishingMessageCarrier_Keys(t *testing.T) {
 	}{
 		{
 			name:   "empty",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{}}},
 			want:   []string{},
 		}, {
 			name:   "one",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar"}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{"foo": "bar"}}},
 			want:   []string{"foo"},
 		}, {
 			name:   "many",
-			fields: fields{msg: &amqp091.Publishing{Headers: map[string]any{"foo": "bar", "foo1": "bar1"}}},
+			fields: fields{msg: &amqp091.Publishing{Headers: amqp091.Table{"foo": "bar", "foo1": "bar1"}}},
 			want:   []string{"foo", "foo1"},
 		},
 	}
@@ -119,17 +119,17 @@ func Test_deliveryMessageCarrier_Get(t *testing.T) {
 	}{
 		{
 			name:   "exists",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar"}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{"foo": "bar"}}},
 			args:   args{key: "foo"},
 			want:   "bar",
 		}, {
 			name:   "not exists",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo1": "bar"}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{"foo1": "bar"}}},
 			args:   args{key: "foo"},
 			want:   "",
 		}, {
 			name:   "ignore not string",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": 1}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{"foo": 1}}},
 			args:   args{key: "foo"},
 			want:   "",
 		},
@@ -150,7 +150,7 @@ func Test_deliveryMessageCarrier_Get(t *testing.T) {
 
 func Test_deliveryMessageCarrier_Set(t *testing.T) {
 	t.Parallel()
-	msg := &amqp091.Delivery{Headers: nil}
+	msg := &amqp091.Delivery{}
 	carrier := newDeliveryMessageCarrier(msg)
 
 	carrier.Set("foo", "bar")
@@ -158,7 +158,7 @@ func Test_deliveryMessageCarrier_Set(t *testing.T) {
 	carrier.Set("foo1", "bar2")
 	carrier.Set("foo2", "bar3")
 
-	assert.ElementsMatch(t, carrier.msg.Headers, map[string]any{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
+	assert.Equal(t, carrier.msg.Headers, amqp091.Table{"foo": "bar", "foo1": "bar2", "foo2": "bar3"})
 }
 
 func Test_deliveryMessageCarrier_Keys(t *testing.T) {
@@ -173,15 +173,15 @@ func Test_deliveryMessageCarrier_Keys(t *testing.T) {
 	}{
 		{
 			name:   "empty",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{}}},
 			want:   []string{},
 		}, {
 			name:   "one",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar"}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{"foo": "bar"}}},
 			want:   []string{"foo"},
 		}, {
 			name:   "many",
-			fields: fields{msg: &amqp091.Delivery{Headers: map[string]any{"foo": "bar", "foo1": "bar1"}}},
+			fields: fields{msg: &amqp091.Delivery{Headers: amqp091.Table{"foo": "bar", "foo1": "bar1"}}},
 			want:   []string{"foo", "foo1"},
 		},
 	}

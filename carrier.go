@@ -36,6 +36,9 @@ func (c publishingMessageCarrier) Get(key string) string {
 
 // Set stores the key-value pair.
 func (c publishingMessageCarrier) Set(key, val string) {
+	if c.msg.Headers == nil {
+		c.msg.Headers = make(amqp091.Table)
+	}
 	c.msg.Headers[key] = val
 }
 
@@ -73,6 +76,9 @@ func (c deliveryMessageCarrier) Get(key string) string {
 
 // Set stores the key-value pair.
 func (c deliveryMessageCarrier) Set(key, val string) {
+	if c.msg.Headers == nil {
+		c.msg.Headers = make(amqp091.Table)
+	}
 	c.msg.Headers[key] = val
 }
 
