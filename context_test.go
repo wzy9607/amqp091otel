@@ -4,13 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func TestContextFromDelivery(t *testing.T) {
 	t.Parallel()
-	ctxInst := context.WithValue(context.Background(), "key", "value")
+	type key struct{}
+	ctxInst := context.WithValue(context.Background(), key{}, "value")
 	type args struct {
 		msg amqp091.Delivery
 	}
@@ -36,7 +38,9 @@ func TestContextFromDelivery(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equalf(t, tt.want, ContextFromDelivery(tt.args.msg), "ContextFromDelivery(%v)", tt.args.msg)
 		})
 	}
