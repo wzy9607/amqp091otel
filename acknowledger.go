@@ -5,16 +5,19 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type acknowledger struct {
-	ch   *Channel
-	ctx  context.Context //nolint:containedctx // consumer needs to retrieve the context via ContextFromDelivery.
-	span trace.Span
+	ch    *Channel
+	acker amqp091.Acknowledger // The real acknowledger is amqp091.Channel
+	ctx   context.Context      //nolint:containedctx // consumer needs to retrieve the context via ContextFromDelivery.
+	span  trace.Span
 }
 
 func (a *acknowledger) Ack(tag uint64, multiple bool) error {
-	err := a.ch.Channel.Ack(tag, multiple)
+	err := a.acker.Ack(tag, multiple)
 	if multiple {
 		a.endMultiple(tag, codes.Ok, "", err)
 	} else {
@@ -24,7 +27,7 @@ func (a *acknowledger) Ack(tag uint64, multiple bool) error {
 }
 
 func (a *acknowledger) Nack(tag uint64, multiple, requeue bool) error {
-	err := a.ch.Channel.Nack(tag, multiple, requeue)
+	err := a.acker.Nack(tag, multiple, requeue)
 	if multiple {
 		a.endMultiple(tag, codes.Error, "nack", err)
 	} else {
@@ -34,7 +37,7 @@ func (a *acknowledger) Nack(tag uint64, multiple, requeue bool) error {
 }
 
 func (a *acknowledger) Reject(tag uint64, requeue bool) error {
-	err := a.ch.Channel.Reject(tag, requeue)
+	err := a.acker.Reject(tag, requeue)
 	a.endOne(tag, codes.Error, "reject", err)
 	return err
 }

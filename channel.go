@@ -106,9 +106,10 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 	ctx, span := ch.cfg.Tracer.Start(parentCtx, //nolint:spancheck // span ends when msg is ack/nack/rejected
 		ch.nameWhenConsume(queue), opts...)
 	msg.Acknowledger = &acknowledger{
-		ch:   ch,
-		ctx:  ctx,
-		span: span,
+		ch:    ch,
+		acker: ch.Channel,
+		ctx:   ctx,
+		span:  span,
 	}
 
 	ch.m.Lock()

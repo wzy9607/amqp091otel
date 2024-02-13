@@ -9,3 +9,5 @@ coverage:
         target: 80%
         threshold: 2%
         informational: true
+ignore:
+  - "mocks/**"
