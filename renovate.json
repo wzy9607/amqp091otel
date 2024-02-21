@@ -4,6 +4,17 @@
     "config:recommended",
     ":rebaseStalePrs"
   ],
+  "prBodyColumns": [
+    "Package",
+    "Type",
+    "Update",
+    "Change",
+    "Pending",
+    "Age",
+    "Adoption",
+    "Passing",
+    "Confidence"
+  ],
   "postUpdateOptions": [
     "gomodTidy"
   ],
