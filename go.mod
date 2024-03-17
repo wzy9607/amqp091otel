@@ -1,6 +1,6 @@
 module github.com/wzy9607/amqp091otel
 
-go 1.19.0
+go 1.20
 
 require (
 	github.com/rabbitmq/amqp091-go v1.9.0
