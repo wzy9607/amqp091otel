@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	semconv "go.opentelemetry.io/otel/semconv/v1.23.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.25.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -48,17 +48,19 @@ func NewChannel(amqpChan *amqp091.Channel, url string, opts ...Option) (*Channel
 	}, nil
 }
 
+// https://opentelemetry.io/docs/specs/semconv/messaging/messaging-spans/#messaging-attributes
+// https://opentelemetry.io/docs/specs/semconv/messaging/rabbitmq/#rabbitmq-attributes
 func (ch *Channel) commonAttrs() []attribute.KeyValue {
 	return []attribute.KeyValue{
 		semconv.ServiceName(amqpLibName),
 		semconv.ServiceVersion(amqpLibVersion),
-		semconv.MessagingSystem(messageSystem),
+		semconv.MessagingSystemRabbitmq,
 		semconv.NetworkProtocolName(ch.uri.Scheme),
 		semconv.NetworkProtocolVersion(netProtocolVer),
 		semconv.NetworkTransportTCP,
 		semconv.ServerAddress(ch.uri.Host),
 		semconv.ServerPort(ch.uri.Port),
-		// todo network.peer.address, network.peer.port, network.type, server.address, server.port
+		// todo network.peer.address, network.peer.port
 	}
 }
 
@@ -83,19 +85,26 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 
 	// Create a span
 	attrs := []attribute.KeyValue{
+		operation,
 		semconv.MessagingDestinationAnonymous(queueAnonymous(queue)),
+		// fixme messaging.destination.name MUST be set to the name of the exchange.
 		semconv.MessagingDestinationName(queue),
 		semconv.MessagingDestinationPublishAnonymous(msg.Exchange == ""),
 		semconv.MessagingDestinationPublishName(msg.Exchange),
 		semconv.MessagingRabbitmqDestinationRoutingKey(msg.RoutingKey),
-		operation,
 		// todo messaging.client_id
+	}
+	if msg.MessageCount != 0 {
+		attrs = append(attrs, semconv.MessagingBatchMessageCount(int(msg.MessageCount)))
 	}
 	if msg.CorrelationId != "" {
 		attrs = append(attrs, semconv.MessagingMessageConversationID(msg.CorrelationId))
 	}
 	if msg.MessageId != "" {
 		attrs = append(attrs, semconv.MessagingMessageID(msg.MessageId))
+	}
+	if msg.DeliveryTag != 0 {
+		attrs = append(attrs, semconv.MessagingRabbitmqMessageDeliveryTag(int(msg.DeliveryTag)))
 	}
 	attrs = append(attrs, ch.commonAttrs()...)
 	opts := []trace.SpanStartOption{
@@ -147,10 +156,10 @@ func (ch *Channel) PublishWithDeferredConfirmWithContext(
 ) (*amqp091.DeferredConfirmation, error) {
 	// Create a span.
 	attrs := []attribute.KeyValue{
+		semconv.MessagingOperationPublish,
 		semconv.MessagingDestinationAnonymous(exchange == ""),
 		semconv.MessagingDestinationName(exchange),
 		semconv.MessagingRabbitmqDestinationRoutingKey(key),
-		semconv.MessagingOperationPublish,
 		// todo messaging.client_id
 	}
 	if msg.CorrelationId != "" {
