@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	semconv "go.opentelemetry.io/otel/semconv/v1.25.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -15,7 +15,6 @@ import (
 
 const (
 	netProtocolVer = "0.9.1"
-	messageSystem  = "rabbitmq"
 )
 
 func queueAnonymous(queue string) bool {
@@ -87,12 +86,11 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 	attrs := []attribute.KeyValue{
 		operation,
 		semconv.MessagingDestinationAnonymous(queueAnonymous(queue)),
-		// fixme messaging.destination.name MUST be set to the name of the exchange.
 		semconv.MessagingDestinationName(queue),
 		semconv.MessagingDestinationPublishAnonymous(msg.Exchange == ""),
 		semconv.MessagingDestinationPublishName(msg.Exchange),
+		// todo messaging.client.id
 		semconv.MessagingRabbitmqDestinationRoutingKey(msg.RoutingKey),
-		// todo messaging.client_id
 	}
 	if msg.MessageCount != 0 {
 		attrs = append(attrs, semconv.MessagingBatchMessageCount(int(msg.MessageCount)))
@@ -136,7 +134,7 @@ func (ch *Channel) Consume(
 	newDeliveries := make(chan amqp091.Delivery)
 	go func() {
 		for msg := range deliveries {
-			ch.startConsumerSpan(&msg, queue, semconv.MessagingOperationDeliver)
+			ch.startConsumerSpan(&msg, queue, semconv.MessagingOperationTypeDeliver)
 			newDeliveries <- msg
 		}
 		close(newDeliveries)
@@ -156,11 +154,12 @@ func (ch *Channel) PublishWithDeferredConfirmWithContext(
 ) (*amqp091.DeferredConfirmation, error) {
 	// Create a span.
 	attrs := []attribute.KeyValue{
-		semconv.MessagingOperationPublish,
+		semconv.MessagingOperationTypePublish,
+		semconv.MessagingOperationName("send"),
 		semconv.MessagingDestinationAnonymous(exchange == ""),
 		semconv.MessagingDestinationName(exchange),
+		// todo messaging.client.id
 		semconv.MessagingRabbitmqDestinationRoutingKey(key),
-		// todo messaging.client_id
 	}
 	if msg.CorrelationId != "" {
 		attrs = append(attrs, semconv.MessagingMessageConversationID(msg.CorrelationId))
@@ -194,6 +193,6 @@ func (ch *Channel) Get(queue string, autoAck bool) (msg amqp091.Delivery, ok boo
 	if err != nil || !ok {
 		return
 	}
-	ch.startConsumerSpan(&msg, queue, semconv.MessagingOperationReceive)
+	ch.startConsumerSpan(&msg, queue, semconv.MessagingOperationTypeReceive)
 	return msg, ok, err
 }
