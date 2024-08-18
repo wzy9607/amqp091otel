@@ -21,6 +21,7 @@ func queueAnonymous(queue string) bool {
 	return strings.HasPrefix(queue, "amq.gen-")
 }
 
+// Channel wraps an [amqp091.Channel] with OpenTelemetry tracing instrumentation.
 type Channel struct {
 	*amqp091.Channel
 	uri amqp091.URI
@@ -31,6 +32,7 @@ type Channel struct {
 	m       sync.Mutex
 }
 
+// NewChannel returns an [amqp091.Channel] with OpenTelemetry tracing instrumentation.
 func NewChannel(amqpChan *amqp091.Channel, url string, opts ...Option) (*Channel, error) {
 	uri, err := amqp091.ParseURI(url)
 	if err != nil {
