@@ -6,7 +6,12 @@
 This module provides OpenTelemetry instrumentation for the Go RabbitMQ Client
 Library [github.com/rabbitmq/amqp091-go](https://github.com/rabbitmq/amqp091-go).
 
-For now, this module only provides tracing instrumentation.
+As for now, this module only provides tracing instrumentation.
+
+## Compatibility
+
+This module supports the same go versions as the
+[opentelemetry-go project](https://github.com/open-telemetry/opentelemetry-go?tab=readme-ov-file#compatibility).
 
 ## Installation
 
