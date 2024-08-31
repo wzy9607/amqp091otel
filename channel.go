@@ -104,6 +104,7 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 		attrs = append(attrs, semconv.MessagingMessageID(msg.MessageId))
 	}
 	if msg.DeliveryTag != 0 {
+		//nolint:gosec // overflow here is relatively safe and unlikely to happen
 		attrs = append(attrs, semconv.MessagingRabbitmqMessageDeliveryTag(int(msg.DeliveryTag)))
 	}
 	attrs = append(attrs, ch.commonAttrs()...)
