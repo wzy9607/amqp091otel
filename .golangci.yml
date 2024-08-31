@@ -1,9 +1,9 @@
 run:
   timeout: 10m
-  show-stats: true
 
 output:
   sort-results: true
+  show-stats: true
 
 linters-settings:
   cyclop:
@@ -24,13 +24,18 @@ linters-settings:
       - switch
       - map
     default-signifies-exhaustive: true
+  funlen:
+    lines: 100
+    statements: 80
   gci:
     sections:
       - standard
       - default
       - prefix(github.com/rabbitmq/amqp091-go)
-      - prefix(github.com/wzy9607/amqp091otel)
+      - localmodule
     custom-order: true
+  gocognit:
+    min-complexity: 20
   gocritic:
     enabled-tags:
       - diagnostic
@@ -40,11 +45,12 @@ linters-settings:
       - opinionated
     disabled-checks:
       - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - emptyStringTest
       - hugeParam
       - ifElseChain
       - ruleguard
       - sloppyReassign
-      - whyNoLint
+      - whyNoLint # nolintlint is better
     settings:
       captLocal:
         paramsOnly: false
@@ -57,7 +63,13 @@ linters-settings:
         replacement: "any"
       - pattern: "a[b:len(a)]"
         replacement: "a[b:]"
-  gomnd:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  grouper:
+    import-require-single-import: true
+  mnd:
     checks:
       - argument
       - case
@@ -65,13 +77,6 @@ linters-settings:
       - return
     ignored-functions:
       - strings.SplitN
-  govet:
-    check-shadowing: true
-    enable-all: true
-    disable:
-      - fieldalignment
-  grouper:
-    import-require-single-import: true
   nakedret:
     max-func-lines: 50
   nolintlint:
@@ -119,11 +124,9 @@ linters-settings:
     time-layout: true
     crypto-hash: true
     default-rpc-path: true
-    os-dev-null: true
     sql-isolation-level: true
     tls-signature-scheme: true
     constant-kind: true
-    syslog-priority: true
   varnamelen:
     max-distance: 10
 
@@ -154,7 +157,6 @@ linters:
     - gocritic
     - gofmt
     - gofumpt
-    - gomnd
     - gomoddirectives
     - gosec
     - gosimple
@@ -168,6 +170,7 @@ linters:
     - makezero
     - mirror
     - misspell
+    - mnd
     - musttag
     - nakedret
     - nestif
@@ -198,7 +201,6 @@ linters:
     - wastedassign
     - whitespace
 
-
 issues:
   include:
     - EXC0003
@@ -214,7 +216,7 @@ issues:
         - exhaustruct
         - forcetypeassert
         - funlen
-        - gomnd
+        - mnd
         - nakedret
         - spancheck
         - varnamelen
