@@ -1,5 +1,5 @@
 with-expecter: true
-dir: "mocks/{{.PackageName}}"
+dir: "internal/mocks/{{.PackageName}}"
 outpkg: "mock{{.PackageName}}"
 packages:
   github.com/rabbitmq/amqp091-go:
