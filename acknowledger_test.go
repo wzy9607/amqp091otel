@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	mockamqp091 "github.com/wzy9607/amqp091otel/mocks/amqp091"
+	"github.com/wzy9607/amqp091otel/internal/mocks/amqp091"
 )
 
 func initMockTracerProvider() (*tracesdk.TracerProvider, *tracetest.InMemoryExporter) {
