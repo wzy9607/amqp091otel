@@ -69,14 +69,14 @@ func (*Channel) nameWhenPublish(exchange string) string {
 	if exchange == "" {
 		exchange = "(default)"
 	}
-	return exchange + " publish"
+	return "publish " + exchange
 }
 
 func (*Channel) nameWhenConsume(queue string) string {
 	if queueAnonymous(queue) {
 		queue = "(anonymous)"
 	}
-	return queue + " process"
+	return "process " + queue
 }
 
 func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operation attribute.KeyValue) {
@@ -87,6 +87,7 @@ func (ch *Channel) startConsumerSpan(msg *amqp091.Delivery, queue string, operat
 	// Create a span
 	attrs := []attribute.KeyValue{
 		operation,
+		semconv.MessagingOperationName("process"),
 		semconv.MessagingDestinationAnonymous(queueAnonymous(queue)),
 		semconv.MessagingDestinationName(queue),
 		semconv.MessagingDestinationPublishAnonymous(msg.Exchange == ""),
@@ -158,7 +159,7 @@ func (ch *Channel) PublishWithDeferredConfirmWithContext(
 	// Create a span.
 	attrs := []attribute.KeyValue{
 		semconv.MessagingOperationTypePublish,
-		semconv.MessagingOperationName("send"),
+		semconv.MessagingOperationName("publish"),
 		semconv.MessagingDestinationAnonymous(exchange == ""),
 		semconv.MessagingDestinationName(exchange),
 		// todo messaging.client.id
