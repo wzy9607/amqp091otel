@@ -38,7 +38,7 @@ jobs:
       - name: Test
         run: gotestsum --junitfile junit.xml --format testname -- -json -coverpkg=./... -coverprofile=./coverage.txt -covermode=atomic ./...
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5.0.4
+        uses: codecov/codecov-action@v5.0.7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Upload test results to Codecov
