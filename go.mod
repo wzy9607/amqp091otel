@@ -2,7 +2,7 @@ module github.com/wzy9607/amqp091otel
 
 go 1.23.0
 
-toolchain go1.24.6
+toolchain go1.25.1
 
 require (
 	github.com/rabbitmq/amqp091-go v1.10.0
